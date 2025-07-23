@@ -13,7 +13,7 @@ The Incubator enables:
 
 ## Tech Stack
 
-- Frontend: Nuxt 3 + Vue 3 + TypeScript
+- Frontend: Nuxt 4 + Vue 3 + TypeScript
 - Tooling: ESLint, Prettier, Cucumber.js for BDD
 - ORM: Drizzle (designed to support both SQLite for development and Postgres for production)
 - Messaging: Nostr relays
