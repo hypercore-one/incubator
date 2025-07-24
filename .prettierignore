@@ -1,0 +1,16 @@
+# Nuxt build output
+.nuxt/
+.output/
+.data/
+dist/
+.nitro/
+.cache/
+
+# Node modules
+node_modules/
+
+# Logs and temporary files
+logs/
+*.log
+pnpm-debug.log*
+.pnpm-store/
