@@ -11,6 +11,17 @@ The Incubator enables:
 - Pillars to browse, review, and publicly pledge support to specific items
 - Transparency into pledges and activity through a public interface
 
+## Features (WIP)
+
+- Stores known pillars (e.g. chain rpc or api to update)
+- Connects to configurable nostr relays
+- Registers pillar npubs by indexing nostr events with pillar signature
+- Whitelists configurable proposer npubs
+- Tracks proposers' projects, tasks, and bounties by indexing nostr events
+- Tracks pillar pledges to projects with ability to overfund by indexing nostr events
+- Displays read-only web ui
+- Integrates with on-chain grant contracts (e.g. chain rpc or api to update project status based on AZ status)
+
 ## Tech Stack
 
 - Frontend: Nuxt 4 + Vue 3 + TypeScript
