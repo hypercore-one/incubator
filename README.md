@@ -50,8 +50,6 @@ git commit -m "..." -n  # Skips Git hooks
 
 ## Editor Setup
 
-The `.vscode/` folder includes settings for format-on-save, ESLint auto-fix on save, and Tailwind CSS file associations to enhance the development experience.
-
 Recommended extensions:
 
 - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
