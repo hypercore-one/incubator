@@ -19,6 +19,12 @@ The Incubator enables:
 - ORM: Drizzle (designed to support both SQLite for development and Postgres for production)
 - Messaging: Nostr relays
 
+## Development Setup
+          
+- Install [Node.js](https://nodejs.org/en/download) and [pnpm](https://pnpm.io/installation)
+- Install dependencies by running `pnpm install`
+- Run the app with `pnpm dev -o`
+
 ## Linting & Formatting
 
 ```bash
