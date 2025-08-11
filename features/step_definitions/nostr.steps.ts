@@ -1,4 +1,3 @@
-// features/step_definitions/nostr.steps.ts
 import { Given, When, Then } from "@cucumber/cucumber";
 import assert from "assert";
 import { getPublicKey, nip19 } from "nostr-tools";
