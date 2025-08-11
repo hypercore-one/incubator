@@ -59,6 +59,49 @@ To skip Git hooks:
 git commit -m "..." -n  # Skips Git hooks
 ```
 
+## BDD with Cucumber (opt-in automation)
+
+We use Cucumber.js with TypeScript to **agree on behavior first** and only automate scenarios explicitly tagged `@automated`.  
+This opt-in approach means we can iterate on behavior descriptions without having to implement every scenario immediately.
+
+### Tagging policy
+- `@automated` — scenario is implemented and part of the automated suite.
+- (untagged) — not automated; runs only if explicitly invoked without the `@automated` filter.
+
+### Marking a step as pending
+If you want a step to be recognized but **not yet implemented**, call `pending()` inside the step definition:
+
+```ts
+import { Given } from '@cucumber/cucumber';
+
+Given('I have an unimplemented step', function () {
+  return 'pending';
+  // or: return this.pending();
+});
+```
+
+Pending steps will:
+- Show as **pending** in output.
+- Pass in `bdd:dev` (because we use `--no-strict`).
+- Fail in `bdd` (strict mode implied).
+
+### Commands
+
+```bash
+pnpm bdd:dev
+```
+Run only `@automated` scenarios using `tsx` to load TypeScript directly; `--no-strict` allows pending steps to pass so you can work incrementally.
+
+```bash
+pnpm typecheck:bdd
+```
+Run TypeScript type-checking for step and support files without emitting any compiled files.
+
+```bash
+pnpm bdd
+```
+Compile step/support files to JavaScript, then run only `@automated` scenarios on the compiled output in strict mode.
+
 ## Editor Setup
 
 Recommended extensions:
