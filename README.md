@@ -69,7 +69,7 @@ This opt-in approach means we can iterate on behavior descriptions without havin
 - (untagged) — not automated; runs only if explicitly invoked without the `@automated` filter.
 
 ### Marking a step as pending
-If you want a step to be recognized but **not yet implemented**, call `pending()` inside the step definition:
+If you want a step to be recognized but **not yet implemented**, return 'pending' or `this.pending()` inside the step definition:
 
 ```ts
 import { Given } from '@cucumber/cucumber';
