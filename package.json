@@ -13,9 +13,8 @@
     "prettier": "prettier --write .",
     "prepare": "husky",
     "typecheck:bdd": "tsc -p tsconfig.cucumber.json --noEmit",
-    "bdd:dev": "cross-env NODE_OPTIONS='--import tsx/esm' cucumber-js --no-strict -p automated --import 'features/step_definitions/**/*.ts' --import 'features/support/**/*.ts'",
-    "bdd": "tsc -p tsconfig.cucumber.json && cucumber-js -p automated --import 'dist-cucumber/features/**/*.js'" 
-
+    "bdd:dev": "cross-env NODE_OPTIONS=\"--import tsx/esm\" cucumber-js --no-strict -p automated --import \"features/step_definitions/**/*.ts\" --import \"features/support/**/*.ts\"",
+    "bdd": "tsc -p tsconfig.cucumber.json && cucumber-js -p automated --import \"dist-cucumber/features/**/*.js\""
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
