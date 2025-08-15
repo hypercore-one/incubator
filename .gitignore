@@ -6,6 +6,9 @@
 .cache
 dist
 
+# Cucumber dev/build
+dist-cucumber/
+
 # Node dependencies
 node_modules
 
