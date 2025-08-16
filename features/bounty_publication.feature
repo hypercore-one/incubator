@@ -11,6 +11,7 @@ Feature: Publishing and updating a bounty via Nostr
       | id | task_id | event_number | amount | currency | status | sender    |
       |    | T123    | 1            | 1000   | points   | 0      | npubAlice |
     And the event number is 1
+    And the ID is empty
     Then a new bounty is created with "npubAlice" as its owner
 
   Scenario: Creation event with unknown task id is ignored
