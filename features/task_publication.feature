@@ -4,65 +4,66 @@ Feature: Publishing and updating task via Nostr
 
   Background:
     Given the system is listening to Nostr events on configured relays
-    And a proposal exists with an ID of "<PROPOSAL_ID>" and an owner of "<NPUB>"
+    And a proposal exists with an ID of "P123" and an owner of "npubAlice"
 
   Scenario: Publishing task
     When a task event is received with:
-      | id      | proposal_id   | event_number | title | description | status | sender |
-      | <EMPTY> | <PROPOSAL_ID> | 1            | Title | Description | 0      | <NPUB> |
+      | id | proposal_id | event_number | title | description | status | sender    |
+      |    | P123        | 1            | Title | Description | 0      | npubAlice |
+    And the ID is empty
     And the event number is 1
-    Then a new task is created with "<NPUB>" as its owner
+    Then a new task is created with "npubAlice" as its owner
 
   Scenario: Creation event with unknown proposal id is ignored
     When a task event is received with:
-      | id      | proposal_id  | event_number | title | description | status | sender |
-      | <EMPTY> | <UNKNOWN_ID> | 1            | Title | Description | 0      | <NPUB> |
-    And no proposal exists with an ID of "<UNKNOWN_ID>"
+      | id | proposal_id | event_number | title | description | status | sender    |
+      |    | P321        | 1            | Title | Description | 0      | npubAlice |
+    And no proposal exists with an ID of "P321"
     Then a task is not created
 
   Scenario: Update event with higher event number updates task
-    Given a task exists with an ID of "<TASK_ID>"
-    And an owner of "<NPUB>"
+    Given a task exists with an ID of "T123"
+    And an owner of "npubAlice"
     When a task event is received with:
-      | id        | proposal_id   | event_number | title | description | status | owner  | signature   |
-      | <TASK_ID> | <PROPOSAL_ID> | 2            | Title | Description | 0      | <NPUB> | <SIG_VALID> |
+      | id   | proposal_id | event_number | title | description | status | sender    |
+      | T123 | P123        | 2            | Title | Description | 0      | npubAlice | 
     And the event number is greater than the previous known event number
     Then the task is updated
 
   Scenario: Update event with lower event number is ignored
     Given a task exists with an event number of 2
     When a task event is received with:
-      | id        | proposal_id   | event_number | title | description | status | sender |
-      | <TASK_ID> | <PROPOSAL_ID> | 1            | Title | Description | 0      | <NPUB> |
+      | id   | proposal_id | event_number | title | description | status | sender    |
+      | T123 | P123        | 1            | Title | Description | 0      | npubAlice |
     Then the task is not updated
 
   Scenario: Update event with same event number is ignored
     Given a task exists with an event number of 2
     When a task event is received with:
-      | id        | proposal_id   | event_number | title | description | status | sender |
-      | <TASK_ID> | <PROPOSAL_ID> | 2            | Title | Description | 0      | <NPUB> |
+      | id   | proposal_id | event_number | title | description | status | sender    |
+      | T123 | P123        | 2            | Title | Description | 0      | npubAlice |
     Then the task is not updated
 
   Scenario: Update event is ignored when sender is not owner
-    Given a task exists with an owner of "<NPUB>"
+    Given a task exists with an owner of "npubAlice"
     When a task event is received with:
-      | id        | proposal_id   | event_number | title | description | status | sender       |
-      | <TASK_ID> | <PROPOSAL_ID> | 2            | Title | Description | 0      | <NPUB_OTHER> |
+      | id   | proposal_id | event_number | title | description | status | sender  |
+      | T123 | P123        | 2            | Title | Description | 0      | npubBob |
     Then the task is not updated
 
   Scenario: Update event with unknown id is ignored
     When a task event is received with:
-      | id           | proposal_id   | event_number | title | description | status | sender |
-      | <UNKNOWN_ID> | <PROPOSAL_ID> | 2            | Title | Description | 0      | <NPUB> |
-    And no task exists with an ID of "<UNKNOWN_ID>"
+      | id   | proposal_id | event_number | title | description | status | sender    |
+      | T321 | P123        | 2            | Title | Description | 0      | npubAlice |
+    And no task exists with an ID of "T321"
     Then the task is not updated
 
   Scenario: Update event with different proposal id is ignored
-    Given a task exists with an ID of "<TASK_ID>"
-    And a proposal ID of "<PROPOSAL_ID>"
+    Given a task exists with an ID of "T123"
+    And a proposal ID of "P123"
     When a task event is received with:
-      | id        | proposal_id         | event_number | title | description | status | sender |
-      | <TASK_ID> | <PROPOSAL_ID_OTHER> | 2            | Title | Description | 0      | <NPUB> |
+      | id   | proposal_id | event_number | title | description | status | sender    |
+      | T123 | P321        | 2            | Title | Description | 0      | npubAlice |
     Then the task is not updated
 
   Scenario: Malformed event is ignored
