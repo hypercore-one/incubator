@@ -1,35 +1,68 @@
 Feature: Publishing and updating a bounty via Nostr
-  As a pillar in the HyperCore One ecosystem I want to be able to
-  publish bounties linked to tasks and update my published bounties.
+  As a user in the I want to be able to publish bounties linked
+  to tasks and update my published bounties.
 
   Background:
-    Given the pillar "PillarOne" has a registered npub of "<NPUB>"
-    And the system is listening to Nostr events on configured relays
+    Given the system is listening to Nostr events on configured relays
     And a task exists with an ID of "<TASK_ID>" and an owner of "<NPUB>"
 
   Scenario: Publishing a bounty
     When a bounty event is received with:
-      | id          | task_id   | event_number | amount_znn | amount_qsr | status | owner  | signature   |
-      | <BOUNTY_ID> | <TASK_ID> | 1            | 1000       | 10000      | 0      | <NPUB> | <SIG_VALID> |
-    And the ID is a SHA-256 hash created from the serialized data of task_id, event_number, amount_znn, amount_qsr, and owner
-    And no bounty exists with an ID of "<BOUNTY_ID>"
-    Then a new bounty is created
+      | id      | task_id   | event_number | amount | currency | status | sender |
+      | <EMPTY> | <TASK_ID> | 1            | 1000   | points   | 0      | <NPUB> |
+    And the event number is 1
+    Then a new bounty is created with "<NPUB>" as its owner
 
-  Scenario: Updating a bounty
+  Scenario: Creation event with unknown task id is ignored
     When a bounty event is received with:
-      | id          | task_id   | event_number | amount_znn | amount_qsr | status | owner  | signature   |
-      | <BOUNTY_ID> | <TASK_ID> | 2            | 1000       | 10000      | 0      | <NPUB> | <SIG_VALID> |
-    And a bounty exists with an ID of "<BOUNTY_ID>"
+      | id      | task_id      | event_number | amount | currency | status | sender |
+      | <EMPTY> | <UNKNOWN_ID> | 1            | 1000   | points   | 0      | <NPUB> |
+    And no bounty exists with an ID of "<UNKNOWN_ID>"
+    Then a bounty is not created
+
+  Scenario: Update event with higher event number updates bounty
+    Given a bounty exists with an ID of "<BOUNTY_ID>"
+    And an owner of "<NPUB>"
+    When a bounty event is received with:
+      | id          | task_id   | event_number | amount | currency | status | sender |
+      | <BOUNTY_ID> | <TASK_ID> | 2            | 500    | ZNN      | 1      | <NPUB> |
     And the event number is greater than the previous known event number
-    And the ZNN and QSR amounts are the same as the previously known amounts
-    Then the bounty is updated
+    Then the bounty's status is updated
 
-  Scenario: Bounty amounts cannot be updated
-    Given a bounty exists with a ZNN amount of 1,000 and a QSR amount of 10,000
-    And the bounty has an ID of "<BOUNTY_ID>"
+Scenario: Update event with lower event number is ignored
+    Given a bounty exists with an event number of 2
     When a bounty event is received with:
-      | id          | task_id   | event_number | amount_znn | amount_qsr | status | owner  | signature   |
-      | <BOUNTY_ID> | <TASK_ID> | 2            | 1500       | 15000      | 0      | <NPUB> | <SIG_VALID> |
+      | id          | task_id   | event_number | amount | currency | status | sender |
+      | <BOUNTY_ID> | <TASK_ID> | 1            | 1000   | points   | 0      | <NPUB> |
+    Then the bounty is not updated
+
+Scenario: Update event with same event number is ignored
+    Given a bounty exists with an event number of 2
+    When a bounty event is received with:
+      | id          | task_id   | event_number | amount | currency | status | sender |
+      | <BOUNTY_ID> | <TASK_ID> | 2            | 1000   | points   | 0      | <NPUB> |
+    Then the bounty is not updated
+
+  Scenario: Update event is ignored when sender is not owner
+    Given a bounty exists with an owner of "<NPUB>"
+    When a bounty event is received with:
+      | id          | task_id   | event_number | amount | currency | status | sender       |
+      | <BOUNTY_ID> | <TASK_ID> | 2            | 1000   | points   | 0      | <NPUB_OTHER> |
+    Then the bounty is not updated
+
+  Scenario: Update event with unknown id is ignored
+    When a bounty event is received with:
+      | id           | task_id   | event_number | amount | currency | status | sender |
+      | <UNKNOWN_ID> | <TASK_ID> | 2            | 1000   | points   | 0      | <NPUB> |
+    And no bounty exists with an ID of "<UNKNOWN_ID>"
+    Then the bounty is not updated
+
+  Scenario: Update event with different task id is ignored
+    Given a bounty exists with an ID of "<BOUNTY_ID>"
+    And a task ID of "<TASK_ID>"
+    When a bounty event is received with:
+      | id          | task_id         | event_number | amount | currency | status | sender |
+      | <BOUNTY_ID> | <TASK_ID_OTHER> | 2            | 1000   | points   | 0      | <NPUB> |
     Then the bounty is not updated
 
   Scenario: Malformed event is ignored

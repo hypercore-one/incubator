@@ -1,26 +1,53 @@
-Feature: Publishing and updating a proposal via Nostr
-  As a pillar in the HyperCore One ecosystem I want to be able to
-  publish proposals and update my published proposals.
+Feature: Publishing and updating proposal via Nostr
+  As a user I want to be able to publish proposals and
+  update my published proposals tied to my npub.
 
   Background:
-    Given the pillar "PillarOne" has a registered npub of "<NPUB>"
-    And the system is listening to Nostr events on configured relays
+    Given the system is listening to Nostr events on configured relays
 
-  Scenario: Publishing a proposal
+  Scenario: Publishing proposal
     When a proposal event is received with:
-      | id            | event_number | title | description | minimum_znn | minimum_qsr | status | owner  | owner_signature |
-      | <PROPOSAL_ID> | 1            | Title | Description | 1000        | 10000       | 0      | <NPUB> | <SIG_VALID>     |
-    And the ID is a SHA-256 hash created from the serialized data of event_number, title, description, minimum_znn, minimum_qsr, and owner
-    And no proposal exists with an ID of "<PROPOSAL_ID>"
-    Then a new proposal is created
+      | id      | event_number | title | description | funding | currency | status | sender |
+      | <EMPTY> | 1            | Title | Description | 10000   | points   | 0      | <NPUB> |
+    And the event number is 1
+    Then a new proposal is created with "<NPUB>" as its owner
 
-  Scenario: Updating a proposal
+  Scenario: Update event with higher event number updates proposal
+    Given a proposal exists with an ID of "<PROPOSAL_ID>"
+    And an owner of "<NPUB>"
     When a proposal event is received with:
-      | id            | event_number | title | description | minimum_znn | minimum_qsr | status | owner  | owner_signature |
-      | <PROPOSAL_ID> | 2            | Title | Description | 1000        | 10000       | 0      | <NPUB> | <SIG_VALID>     |
-    And a proposal exists with an ID of "<PROPOSAL_ID>"
+      | id            | event_number | title | description | funding | currency | status | sender |
+      | <PROPOSAL_ID> | 2            | Title | Description | 10000   | points   | 0      | <NPUB> |
     And the event number is greater than the previous known event number
-    Then the proposal is updated
+    Then the proposal's title, description, funding, currency, and status are updated
+
+  Scenario: Update event with lower event number is ignored
+    Given a proposal exists with an event number of 2
+    When a proposal event is received with:
+      | id            | event_number | title | description | funding | currency | status | sender |
+      | <PROPOSAL_ID> | 1            | Title | Description | 10000   | points   | 0      | <NPUB> |
+    Then the proposal is not updated
+
+  Scenario: Update event with same event number is ignored
+    Given a proposal exists with an event number of 2
+    When a proposal event is received with:
+      | id            | event_number | title | description | funding | currency | status | sender |
+      | <PROPOSAL_ID> | 2            | Title | Description | 10000   | points   | 0      | <NPUB> |
+    Then the proposal is not updated
+
+  Scenario: Update event is ignored when sender is not owner
+    Given a proposal exists with an owner of "<NPUB>"
+    When a proposal event is received with:
+      | id            | event_number | title | description | funding | currency | status | sender       |
+      | <PROPOSAL_ID> | 2            | Title | Description | 10000   | points   | 0      | <NPUB_OTHER> |
+    Then the proposal is not updated
+
+  Scenario: Update event with unknown id is ignored
+    When a proposal event is received with:
+      | id           | event_number | title | description | funding | currency | status | sender |
+      | <UNKNOWN_ID> | 2            | Title | Description | 10000   | points   | 0      | <NPUB> |
+    And no proposal exists with an ID of "<UNKNOWN_ID>"
+    Then the proposal is not updated
 
   Scenario: Malformed event is ignored
     # TODO: split into specific cases once Nostr event format is finalized.
