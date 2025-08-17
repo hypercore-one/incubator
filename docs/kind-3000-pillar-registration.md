@@ -9,7 +9,7 @@
 
 This document specifies a Nostr event for binding a Pillar's public key to a Nostr public key (`npub`) within the HyperCore One Incubator ecosystem. This creates a verifiable link between a Pillar's on-chain identity and a Nostr public key.
 
-This is a **regular, non-replaceable event**. A full history of registration events is maintained to provide an audit trail. Updates are managed via a sequentially increasing `sequence`.
+This is a **regular, non-replaceable event**. A full history of registration events is maintained to provide an audit trail. Updates are managed via a sequentially increasing `event_number`.
 
 This specification incorporates [NIP-73](https://github.com/nostr-protocol/nips/blob/master/73.md) for discoverability of events associated with the Pillar's on-chain address.
 
@@ -33,7 +33,7 @@ The `content` field **MUST** be empty.
   "kind": 3000,
   "tags": [
     ["pillar", "<on-chain pillar moniker>"],
-    ["sequence", "<sequential number as string>"],
+    ["event_number", "<sequential event number as string>"],
     ["pillar_pubkey", "<64-character Ed25519 public key in lowercase hexadecimal>"],
     ["pillar_sig", "<128-character Ed25519 signature in lowercase hexadecimal>"],
     ["i", "<network>[:<chainId, integer>]:address:<pillar_bech32_address>"],
@@ -51,7 +51,7 @@ The `content` field **MUST** be empty.
 | Tag Name | Description | Example Format | Required |
 |----------|-------------|----------------|---------|
 | `pillar` | Pillar's registered name | `["pillar", "PillarOne"]` | Yes |
-| `sequence` | Sequential number for updates | `["sequence", "1"]` | Yes |
+| `event_number` | Sequential event number for updates | `["event_number", "1"]` | Yes |
 | `pillar_pubkey` | Pillar's Ed25519 public key used for verification | `["pillar_pubkey", "aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899"]` | Yes |
 | `pillar_sig` | Pillar's Ed25519 signature over the canonical message | `["pillar_sig", "ea00f1ab2ad34b60080e77b431d806e9ead4a4eee36e41cf58a05859b080a03a4dc8a8b21b4952dacf5f7f97262ffdcde47132a269ca97c69260543cd0dc8604"]` | Yes |
 | `i` | NIP-73 pillar address identifier | `["i", "zenon:1:address:z1qqjnwjjpnue8xmmpanz6csze6tcmtzzdtfsww7"]` | Yes |
@@ -66,10 +66,10 @@ The `content` field **MUST** be empty.
  
  Note: This tag is informational and MAY be omitted. Clients MUST NOT enforce uniqueness or rely on it for identity, deduplication, or record selection. For a verified name, resolve it from the on-chain name assigned to the address in the `i` tag in the Zenon Network; if it matches the tag value you MAY display a verified indicator.
 
-### `sequence`
- A sequential integer (as a string) used for versioning. When multiple registration events exist for the same Pillar, the one with the highest `sequence` is considered the most recent. Events with a lower number MUST be ignored.
+### `event_number`
+ A sequential integer (as a string) used for versioning. When multiple registration events exist for the same Pillar, the one with the highest `event_number` is considered the most recent. Events with a lower number MUST be ignored.
 
-Example: `["sequence", "1"]`
+Example: `["event_number", "1"]`
 
 ### `pillar_pubkey`
 The Pillar's Ed25519 registered public key on Zenon Network. This key is used to verify `pillar_sig`.
@@ -105,7 +105,7 @@ Example: `["e", "4376c65d2f232afbe9b882a35baa4f6fe8667c4e684749af565f981833ed6a6
 To prevent replay across contexts and to ensure wallet compatibility, the external signature MUST be produced over the following canonical, single-line UTF-8 string constructed from the event fields and tags exactly as published, joined with the `|` character in this exact order:
 
 ```
-hc1:registration|kind=3000|i=<value of i tag>|k=<value of k tag>|nostr_pubkey=<event.pubkey, lowercase hex>|sequence=<value of sequence tag>|created_at=<event.created_at>
+hc1:registration|kind=3000|i=<value of i tag>|k=<value of k tag>|nostr_pubkey=<event.pubkey, lowercase hex>|event_number=<value of event_number tag>|created_at=<event.created_at>
 ```
 
 Normalization rules:
@@ -133,7 +133,7 @@ To accept a Pillar Registration, clients MUST:
    - Verify `pillar_sig` (Ed25519) over the Canonical Signature Message using `pillar_pubkey`.
 
 5. Selection
-   - Per `i`/`k`, select the event with the highest `sequence`.
+   - Per `i`/`k`, select the event with the highest `event_number`.
    - If tied, prefer greater `created_at`; if still tied, prefer the lexicographically lowest `id`.
 
 ## Relay Behavior
@@ -150,7 +150,7 @@ Relays SHOULD treat Kind 3000 events as regular events and are not required to p
   "kind": 3000,
   "tags": [
     ["pillar", "PillarOne"],
-    ["sequence", "1"],
+    ["event_number", "1"],
     ["pillar_pubkey", "aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899"],
     ["pillar_sig", "ea00f1ab2ad34b60080e77b431d806e9ead4a4eee36e41cf58a05859b080a03a4dc8a8b21b4952dacf5f7f97262ffdcde47132a269ca97c69260543cd0dc8604"],
     ["i", "zenon:1:address:z1qqjnwjjpnue8xmmpanz6csze6tcmtzzdtfsww7"],
