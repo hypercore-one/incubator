@@ -1,5 +1,5 @@
 Feature: Publishing and updating a bounty via Nostr
-  As a user in the I want to be able to publish bounties linked
+  As a user I want to be able to publish bounties linked
   to tasks and update my published bounties.
 
   Background:
